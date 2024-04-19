@@ -4,7 +4,7 @@ const path = require('path');
 const {convertCsvToXlsx} = require('@aternus/csv-to-xlsx');
 
 (async () => {
-  nameSheet = "dentist.csv";
+  nameSheet = "result.csv";
   query = "gastroenterologist";
   latitude = "22.572645";
   longitude = "88.363892";
@@ -103,9 +103,7 @@ const {convertCsvToXlsx} = require('@aternus/csv-to-xlsx');
   };
   const batchSize = 5;
   const results = [];
-//   for (let i = 0; i < urls.length; i += batchSize) {
-                    // |
-                    // V
+
   for (let i = 0; i < urls.length; i += batchSize) {
     const batchUrls = urls.slice(i, i + batchSize);
     const batchResults = await Promise.all(
@@ -124,7 +122,7 @@ const {convertCsvToXlsx} = require('@aternus/csv-to-xlsx');
   fs.writeFileSync(nameSheet, csvHeader + csvRows);
   await browser.close();
 
-  let source = path.join(__dirname, 'dentist.csv');
+  let source = path.join(__dirname, 'result.csv');
   let destination = path.join(__dirname, 'final.xlsx');
   
   try {
