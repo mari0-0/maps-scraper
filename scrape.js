@@ -4,10 +4,10 @@ const path = require('path');
 const {convertCsvToXlsx} = require('@aternus/csv-to-xlsx');
 
 (async () => {
-  nameSheet = "result.csv";
-  query = "gastroenterologist";
-  latitude = "22.572645";
-  longitude = "88.363892";
+  query = "orthopedists in guwahati";
+  nameSheet = `${query}.csv`;
+  latitude = "26.1158";
+  longitude = "91.7086";
 
   //   `https://www.google.com/maps/search/dentist/@36.3671965,-86.5156829,10z/data=!3m1!4b1?authuser=0&hl=en&entry=ttu`;
   googleUrl =
@@ -15,8 +15,8 @@ const {convertCsvToXlsx} = require('@aternus/csv-to-xlsx');
   console.time("Execution Time");
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
-  await page.goto(googleUrl);
-  await page.waitForSelector('[jstcache="3"]');
+  await page.goto(googleUrl, { timeout: 0 });
+  await page.waitForSelector('[jstcache="3"]', { timeout: 0 });
   const scrollable = await page.$(
     "xpath=/html/body/div[2]/div[3]/div[8]/div[9]/div/div/div[1]/div[2]/div/div[1]/div/div/div[1]/div[1]"
   );
@@ -40,7 +40,7 @@ const {convertCsvToXlsx} = require('@aternus/csv-to-xlsx');
   const scrapePageData = async (url) => {
     const newPage = await browser.newPage();
     await newPage.goto(url);
-    await newPage.waitForSelector('[jstcache="3"]');
+    await newPage.waitForSelector('[jstcache="3"]', {timeout: 0});
     const nameElement = await newPage.$(
       "xpath=/html/body/div[2]/div[3]/div[8]/div[9]/div/div/div[1]/div[2]/div/div[1]/div/div/div[2]/div/div[1]/div[1]/h1"
     );
@@ -122,8 +122,8 @@ const {convertCsvToXlsx} = require('@aternus/csv-to-xlsx');
   fs.writeFileSync(nameSheet, csvHeader + csvRows);
   await browser.close();
 
-  let source = path.join(__dirname, 'result.csv');
-  let destination = path.join(__dirname, 'final.xlsx');
+  let source = path.join(__dirname, `${query}.csv`);
+  let destination = path.join(__dirname, `${query}.xlsx`);
   
   try {
     convertCsvToXlsx(source, destination);
@@ -131,5 +131,7 @@ const {convertCsvToXlsx} = require('@aternus/csv-to-xlsx');
     console.error(e.toString());
   }
 
+  fs.unlinkSync(source)
+  
   console.timeEnd("Execution Time");
 })();
