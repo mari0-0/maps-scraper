@@ -1,18 +1,18 @@
 const { chromium } = require("playwright");
 const fs = require("fs");
 const path = require('path');
-const {convertCsvToXlsx} = require('@aternus/csv-to-xlsx');
+const { convertCsvToXlsx } = require('@aternus/csv-to-xlsx');
 
-(async () => {
-  query = "orthopedists in guwahati";
-  nameSheet = `${query}.csv`;
-  latitude = "26.1158";
-  longitude = "91.7086";
+const queries = [
+  { query: "orthopedists in guwahati", latitude: "26.1158", longitude: "91.7086" },
+  { query: "dentists in delhi", latitude: "28.7041", longitude: "77.1025" },
+];
 
-  //   `https://www.google.com/maps/search/dentist/@36.3671965,-86.5156829,10z/data=!3m1!4b1?authuser=0&hl=en&entry=ttu`;
-  googleUrl =
-    `https://www.google.com/maps/search/${query}/@${latitude},${longitude},10z/data=!3m1!4b1?authuser=0&hl=en&entry=ttu`;
-  console.time("Execution Time");
+const scrapeData = async (query, latitude, longitude) => {
+  const nameSheet = `${query}.csv`;
+
+  const googleUrl = `https://www.google.com/maps/search/${query}/@${latitude},${longitude},10z/data=!3m1!4b1?authuser=0&hl=en&entry=ttu`;
+  console.time("Execution Time for " + query);
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
   await page.goto(googleUrl, { timeout: 0 });
@@ -39,8 +39,8 @@ const {convertCsvToXlsx} = require('@aternus/csv-to-xlsx');
   );
   const scrapePageData = async (url) => {
     const newPage = await browser.newPage();
-    await newPage.goto(url);
-    await newPage.waitForSelector('[jstcache="3"]', {timeout: 0});
+    await newPage.goto(url, {timeout: 0});
+    await newPage.waitForSelector('[jstcache="3"]', { timeout: 0 });
     const nameElement = await newPage.$(
       "xpath=/html/body/div[2]/div[3]/div[8]/div[9]/div/div/div[1]/div[2]/div/div[1]/div/div/div[2]/div/div[1]/div[1]/h1"
     );
@@ -133,5 +133,12 @@ const {convertCsvToXlsx} = require('@aternus/csv-to-xlsx');
 
   fs.unlinkSync(source)
   
-  console.timeEnd("Execution Time");
+  console.timeEnd("Execution Time for " + query);
+};
+
+(async () => {
+  for (const { query, latitude, longitude } of queries) {
+    console.log(`Scraping data for ${query}...`);
+    await scrapeData(query, latitude, longitude);
+  }
 })();
